@@ -1,4 +1,7 @@
 const usermodal = require('../models/user_modal')
+const jwt = require('jsonwebtoken')
+const {JWT_SECRET} = require('../uitilities/config') 
+const bCrypt = require('bcrypt')
 
 const newuser = async(req,res) => {
 
@@ -10,10 +13,15 @@ const newuser = async(req,res) => {
             return res.status(404).json({status: false , data: {messege: 'NO DATA AVALIBE IN BODY'}})
         }
 
+        const hashpassword = bCrypt.hashSync(user.password, 6)
+
+
+
+
         const dbuser = usermodal({
             name: user.name,
             age: user.age,
-            password: user.password
+            password: hashpassword
         })
 
         await dbuser.save()
@@ -87,4 +95,35 @@ const deleteuser = async(req,res) => {
         
     }
 }
-module.exports = {newuser,getuser,edituser,deleteuser}
+
+const login = async(req,res) => {
+    try{
+        const user = req.body;
+        const dbuser = await usermodal.findOne({age:user.age})
+
+        if(!dbuser){
+            return res.status(404).json({status:false, data:{message:'Email not found'}})
+        }
+        
+        const match = bCrypt.compareSync(user.password, dbuser.password)
+        
+        if(match){
+            const token = jwt.sign({id:dbuser._id}, JWT_SECRET)
+            return res.status(200).json({status:true, data:{message:'login successfylly', data:dbuser , token:token}})
+        }
+        // remove object
+        else{
+            return res.status(404).json({status:false, data:{message:'Incorrect password'}})
+
+        }
+
+    }
+    catch(error){
+        console.log(error)
+        return res.status(500).json({status:false, data:{message:"Internal server error", data:error}})
+    }
+}
+
+
+
+module.exports = {newuser,getuser,edituser,deleteuser,login}
