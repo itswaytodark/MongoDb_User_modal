@@ -124,6 +124,12 @@ const login = async(req,res) => {
     }
 }
 
+const Authorization = async(req,res) => {
+
+    return res.status(200).json({status:true , message: 'Auth Successfull', data: req.fetch })
+
+}
 
 
-module.exports = {newuser,getuser,edituser,deleteuser,login}
+
+module.exports = {newuser,getuser,edituser,deleteuser,login, Authorization}
