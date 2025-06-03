@@ -13,18 +13,21 @@ const newuser = async(req,res) => {
             return res.status(404).json({status: false , data: {messege: 'NO DATA AVALIBE IN BODY'}})
         }
 
+        const userExist = await usermodal.findOne({name:user.name})
+        if(userExist)
+        {
+            return res.status(409).json({status:true, data:{messege: 'user name Already Exist'}})
+        }
+
         const hashpassword = bCrypt.hashSync(user.password, 6)
-
-
-
 
         const dbuser = usermodal({
             name: user.name,
             age: user.age,
             password: hashpassword
         })
-
         await dbuser.save()
+
         return res.status(200).json({status:true, data:{messege: 'User Created Successfully' , users: dbuser}})
     }
     catch(error)
