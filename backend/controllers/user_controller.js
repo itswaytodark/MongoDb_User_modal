@@ -2,6 +2,8 @@ const usermodal = require('../models/user_modal')
 const jwt = require('jsonwebtoken')
 const {JWT_SECRET} = require('../uitilities/config') 
 const bCrypt = require('bcrypt')
+const { sendMail } = require('../uitilities/nodemailer')
+
 
 const newuser = async(req,res) => {
 
@@ -23,10 +25,12 @@ const newuser = async(req,res) => {
 
         const dbuser = usermodal({
             name: user.name,
-            age: user.age,
+            email: user.email,
             password: hashpassword
         })
         await dbuser.save()
+
+        sendMail(user.email,`WELCOME ${user.name} ` , 'WE ARE HAPPY TO HAVE YOU AS USER ' , `<a href='https://www.youtube.com/watch?v=o1BhCIRYnWI&t=1653s'> CLICK TO OPEN VIDEO</a>`)
 
         return res.status(200).json({status:true, data:{messege: 'User Created Successfully' , users: dbuser}})
     }
@@ -68,7 +72,7 @@ const edituser = async(req,res) => {
         const dbuser = await usermodal.updateOne({_id:userid}, 
             {
                 name: user.name,
-                age: user.age,
+                email: user.email,
                 password: user.password
             }
         )
@@ -102,7 +106,7 @@ const deleteuser = async(req,res) => {
 const login = async(req,res) => {
     try{
         const user = req.body;
-        const dbuser = await usermodal.findOne({age:user.age})
+        const dbuser = await usermodal.findOne({email:user.email})
 
         if(!dbuser){
             return res.status(404).json({status:false, data:{message:'Email not found'}})

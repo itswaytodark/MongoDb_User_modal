@@ -6,8 +6,8 @@ const userScema = mongoose.Schema({
         type: String,
         required: true
     },
-    age: {
-        type: Number
+    email: {
+        type: String
     },
     password: {
         type: String
